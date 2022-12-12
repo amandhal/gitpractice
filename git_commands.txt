@@ -1,0 +1,5 @@
+git config --global user.name "amandhal"
+git config --global user.email "amandhal.ad@gmail.com"
+git config --global core.editor "vim"
+git config --list
+git reset --hard HEAD^
