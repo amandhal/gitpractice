@@ -1,33 +1,214 @@
-## Task 1 — Verified System’s Network Identity using ip addr and ip route 
-<img width="1000" height="754" alt="verify-system-network-identity" src="https://github.com/user-attachments/assets/29f43fdc-e18d-4b21-b351-db348a25d4e2" />
+# 📘 Web Servers -- Day 1 (NGINX Basics)
 
+## 📌 Objective
 
-## Task 2 — Tested Internet Connectivity Flow using Ping and Traceroute
-<img width="1275" height="697" alt="ping-by-ip-and-domain" src="https://github.com/user-attachments/assets/652ae0b8-02de-4b19-8229-fc6b86f5465a" />
-<img width="803" height="364" alt="traceroute" src="https://github.com/user-attachments/assets/b33fc8cc-accf-4ecc-a224-85a68e7e9e4b" />
+Learn the fundamentals of **NGINX web server configuration**, including:
 
+-   Installing NGINX
+-   Understanding configuration structure
+-   Creating a simple web server
+-   Handling requests and responses
 
-## Task 3 — Analyzed DNS in Detail using dig and nslookup
-<img width="703" height="713" alt="dig-and-nslookup" src="https://github.com/user-attachments/assets/6bbda60d-1682-4aff-b637-60e9586d07b7" />
+------------------------------------------------------------------------
 
+# 🧠 Key Concepts Covered
 
-## Task 4 — Hosted a Simple Website using Nginx
-<img width="1355" height="753" alt="install-nginx-and-test-locally" src="https://github.com/user-attachments/assets/f037404f-245f-4058-a2b1-762d533ea1f9" />
-<img width="1297" height="815" alt="access-from-browser" src="https://github.com/user-attachments/assets/9d10da60-5afe-42b4-80b4-c1bbf938396a" />
+-   Web servers
+-   NGINX architecture
+-   `server` blocks
+-   `location` blocks
+-   Default server behaviour
+-   Request routing
 
+------------------------------------------------------------------------
 
-## Task 5 — Checked Listening Ports using ss
-<img width="1809" height="691" alt="check-listening-ports" src="https://github.com/user-attachments/assets/e78a66dd-8f4e-4e59-a8cb-46843f664629" />
+# ⚙️ Environment Setup
 
+### Install NGINX
 
-## Task 6 — Tested Application Connectivity using curl and wget
-<img width="1828" height="737" alt="test-application-connectivity" src="https://github.com/user-attachments/assets/daf7b771-4d17-4bfe-9d4d-45ebc5c9ffa4" />
+``` bash
+sudo apt update
+sudo apt install nginx
+```
 
+### Verify Installation
 
-## Task 7 — Simulated a Firewall Restriction (UFW)
-<img width="1805" height="834" alt="simulate-a-firewall-restriction-ufw" src="https://github.com/user-attachments/assets/daa93bd6-eae4-4925-8f22-77d039f2a380" />
+``` bash
+nginx -v
+```
 
+Start NGINX
 
-## Task 8 — Created a Local Domain Using /etc/hosts
-<img width="1577" height="351" alt="create-a-local-domain-using-etc-hosts" src="https://github.com/user-attachments/assets/1e60ebe2-dbbd-4faa-b13e-ecae6179a0e4" />
+``` bash
+sudo systemctl start nginx
+```
 
+Enable on boot
+
+``` bash
+sudo systemctl enable nginx
+```
+
+Check status
+
+``` bash
+sudo systemctl status nginx
+```
+
+------------------------------------------------------------------------
+
+# 📂 NGINX Important Directories
+
+  Path                           Purpose
+  ------------------------------ -----------------------
+  `/etc/nginx/nginx.conf`        Main configuration
+  `/etc/nginx/sites-available`   Virtual host configs
+  `/etc/nginx/sites-enabled`     Enabled sites
+  `/var/www/html`                Default web root
+  `/var/log/nginx`               Access and error logs
+
+------------------------------------------------------------------------
+
+# 🧾 Basic NGINX Server Configuration
+
+Example configuration:
+
+``` nginx
+server {
+    listen 80;
+    server_name mysite.local;
+
+    root /var/www/mysite.local/html;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
+```
+
+### Explanation
+
+  Directive       Meaning
+  --------------- -----------------------
+  `listen 80`     Listen on HTTP port
+  `server_name`   Domain name
+  `root`          Website directory
+  `index`         Default file
+  `try_files`     Checks requested file
+
+------------------------------------------------------------------------
+
+# 📁 Create Website Directory
+
+``` bash
+sudo mkdir -p /var/www/mysite.local/html
+```
+
+Set ownership
+
+``` bash
+sudo chown -R $USER:$USER /var/www/mysite.local
+```
+
+Create test page
+
+``` bash
+nano /var/www/mysite.local/html/index.html
+```
+
+Example HTML:
+
+``` html
+<h1>Welcome to My NGINX Server</h1>
+```
+
+------------------------------------------------------------------------
+
+# 🔗 Enable Site
+
+Create config file
+
+``` bash
+sudo nano /etc/nginx/sites-available/mysite.local
+```
+
+Enable site
+
+``` bash
+sudo ln -s /etc/nginx/sites-available/mysite.local /etc/nginx/sites-enabled/
+```
+
+Test configuration
+
+``` bash
+sudo nginx -t
+```
+
+Reload NGINX
+
+``` bash
+sudo systemctl reload nginx
+```
+
+------------------------------------------------------------------------
+
+# 🧪 Testing
+
+Open browser:
+
+    http://mysite.local
+
+Or using curl:
+
+``` bash
+curl localhost
+```
+
+------------------------------------------------------------------------
+
+# 🚨 Common Errors
+
+### 403 Forbidden
+
+Directory permission issue.
+
+Fix:
+
+``` bash
+chmod -R 755 /var/www
+```
+
+------------------------------------------------------------------------
+
+### 404 Not Found
+
+File does not exist or wrong `root` path.
+
+------------------------------------------------------------------------
+
+# 📚 What You Learned
+
+-   Installing NGINX
+-   Creating server blocks
+-   Setting document root
+-   Enabling virtual hosts
+-   Testing configuration
+
+------------------------------------------------------------------------
+
+# 📅 Training Series
+
+  Day     Topic
+  ------- ----------------
+  Day 1   NGINX Basics
+  Day 2   NGINX Routing
+  Day 3   Reverse Proxy
+  Day 4   Load Balancing
+
+------------------------------------------------------------------------
+
+# 🚀 CloudMaven DevOps Internship
+
+Hands-on DevOps training covering Web Servers, CI/CD, Containers, and
+Cloud.
