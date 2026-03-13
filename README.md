@@ -84,3 +84,6 @@ volumes:
   mongo-data:
     driver: local
   ```
+```bash
+docker compose up -d
+```
