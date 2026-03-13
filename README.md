@@ -44,14 +44,6 @@ docker push amandhal/frontend:1.0
 
 #### Step 5: Deploy MERN APP Using Docker Compose
 ```yaml
-networks:
-  mern_network:
-    driver: bridge 
-
-volumes:
-  mongo-data:
-    driver: local
-
 services:
   frontend:
     image: amandhal/frontend:1.0
@@ -82,5 +74,13 @@ services:
     networks:
       - mern_network
     volumes:
-      - mongo-data:/data/db  
+      - mongo-data:/data/db
+
+networks:
+  mern_network:
+    driver: bridge 
+
+volumes:
+  mongo-data:
+    driver: local
   ```
