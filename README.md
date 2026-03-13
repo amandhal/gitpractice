@@ -51,8 +51,6 @@ services:
       - "80:80"  
     networks:
       - mern_network
-    environment:
-      REACT_APP_API_URL: http://localhost:5050 
     depends_on:
       - backend
       
