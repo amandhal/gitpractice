@@ -42,7 +42,7 @@ docker push amandhal/frontend:1.0
 ```
 <img width="1540" height="687" alt="image" src="https://github.com/user-attachments/assets/a091bbc6-e2d2-44a2-b20c-c184686bcdbc" />
 
-#### Step 5: Deploy MERN APP Using Docker Compose
+#### Step 5: Create Docker Compose File
 ```yaml
 services:
   frontend:
@@ -84,6 +84,8 @@ volumes:
   mongo-data:
     driver: local
   ```
+
+#### Step 6: Deploy App Using Docker Compose
 ```bash
 docker compose up -d
 ```
