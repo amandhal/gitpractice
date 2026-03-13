@@ -17,3 +17,5 @@ CMD ["node", "server.js"]
 docker build -t amandhal/backend:1.0 .
 docker push amandhal/backend:1.0
 ```
+<img width="1521" height="655" alt="image" src="https://github.com/user-attachments/assets/c2642410-6faf-4bac-a5ec-330284baa879" />
+
