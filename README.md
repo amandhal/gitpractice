@@ -87,3 +87,6 @@ volumes:
 ```bash
 docker compose up -d
 ```
+<img width="1852" height="481" alt="image" src="https://github.com/user-attachments/assets/6844036e-59f6-4c2e-b453-4b2474777e12" />
+<img width="1843" height="373" alt="image" src="https://github.com/user-attachments/assets/4bf31a1e-621e-4192-a75a-78cdc5b75ff2" />
+
