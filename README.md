@@ -34,6 +34,7 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
 ```
+<img width="1540" height="687" alt="image" src="https://github.com/user-attachments/assets/5c83d445-c85a-4817-9f51-f656e2e36fff" />
 
 #### Step 2: Build & Push Frontend Image to Docker Hub
 ```bash
