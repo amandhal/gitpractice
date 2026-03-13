@@ -34,12 +34,12 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
 ```
-<img width="1540" height="687" alt="image" src="https://github.com/user-attachments/assets/5c83d445-c85a-4817-9f51-f656e2e36fff" />
 
-#### Step 2: Build & Push Frontend Image to Docker Hub
+#### Step 4: Build & Push Frontend Image to Docker Hub
 ```bash
 docker build -t amandhal/frontend:1.0 .
 docker push amandhal/frontend:1.0
 ```
+<img width="1540" height="687" alt="image" src="https://github.com/user-attachments/assets/a091bbc6-e2d2-44a2-b20c-c184686bcdbc" />
 
 
