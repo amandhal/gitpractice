@@ -1,4 +1,4 @@
-# Contanerise & Deploy 3-Tier MERN Stack App Using Docker
+# Contanerize & Deploy 3-Tier MERN Stack App Using Docker
 
 #### Step 1: Create Dockerfile for Backend Tier
 ```dockerfile
