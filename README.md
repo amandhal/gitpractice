@@ -120,3 +120,79 @@ docker compose up -d
 <img width="1852" height="481" alt="image" src="https://github.com/user-attachments/assets/6844036e-59f6-4c2e-b453-4b2474777e12" />
 <img width="1843" height="373" alt="image" src="https://github.com/user-attachments/assets/4bf31a1e-621e-4192-a75a-78cdc5b75ff2" />
 
+------------------------------------------------------------------------
+
+#### Step 9: Create & Test GitHub Actions Workflow to Build & Push Images Automatically on Code Changes
+```yaml
+name: Build and Push Backend Image
+
+on:
+  push:
+    branches:
+      - docker/day-2
+    paths:
+      - "docker/day-2/backend/**"
+      - ".github/workflows/build-push-backend.yaml"
+
+jobs:
+  build-push-backend:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & Push Backend Image
+        run: |
+          docker build -t ghcr.io/${{ github.repository_owner }}/backend:latest ./docker/day-2/backend
+          docker push ghcr.io/${{ github.repository_owner }}/backend:latest
+```
+```yaml
+name: Build and Push Frontend Image
+
+on:
+  push:
+    branches:
+      - docker/day-2
+    paths:
+      - "docker/day-2/frontend/**"
+      - ".github/workflows/build-push-frontend.yaml"
+
+jobs:
+  build-push-frontend:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & Push Frontend Image to GHCR
+        run: |
+          docker build -t ghcr.io/${{ github.repository_owner }}/frontend:latest ./docker/day-2/frontend
+          docker push ghcr.io/${{ github.repository_owner }}/frontend:latest
+```
+<img width="1913" height="744" alt="Image" src="https://github.com/user-attachments/assets/e3a2bd84-b155-4b1d-b841-51934b9f701b" />
+<img width="1352" height="632" alt="Image" src="https://github.com/user-attachments/assets/2e96f9ad-76dd-45ff-8586-eff6c52d052c" />
+<img width="1363" height="649" alt="Image" src="https://github.com/user-attachments/assets/eb55f767-7f94-4c04-8b41-3fd456146145" />
