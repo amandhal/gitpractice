@@ -29,3 +29,14 @@ INSERT INTO users VALUES (1, 'Aman Dhal', 'DevOps Intern');
 SELECT * FROM users;
 ```
 <img width="534" height="194" alt="image" src="https://github.com/user-attachments/assets/185392f8-5ff5-4a21-942c-27068923ef5c" />
+
+---
+
+- Test Data Persistance by removing existing  container and then creating a new mysql container using the same volume
+```bash
+docker stop mysql-db
+docker rm mysql-db
+docker run -d --name new-mysql-db -e MYSQL_ROOT_PASSWORD=root -v mysql-data:/var/lib/mysql mysql:8
+docker exec -it new-mysql-db mysql -uroot -proot
+```
+<img width="969" height="738" alt="image" src="https://github.com/user-attachments/assets/ab9cae20-9f2f-4061-968d-27e00c3e4754" />
