@@ -1,5 +1,3 @@
-Docker Volumes - Hands-On Tasks
-
 ## Demo 1: Named Volumes
 - #### Create a mysql container using a named volume.
 ```bash
