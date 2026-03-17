@@ -1,7 +1,7 @@
 ## Docker Volumes - Hands-On Tasks
 
-### Demo 1: Named Volumes
-- Create a mysql container using a named volume.
+## Demo 1: Named Volumes
+- ### Create a mysql container using a named volume.
 ```bash
 docker volume create mysql-data
 docker run -d --name mysql-db -e MYSQL_ROOT_PASSWORD=root -v mysql-data:/var/lib/mysql mysql:8
