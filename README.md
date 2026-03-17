@@ -1,7 +1,7 @@
-## Docker Volumes - Hands-On Tasks
+Docker Volumes - Hands-On Tasks
 
 ## Demo 1: Named Volumes
-- ### Create a mysql container using a named volume.
+- #### Create a mysql container using a named volume.
 ```bash
 docker volume create mysql-data
 docker run -d --name mysql-db -e MYSQL_ROOT_PASSWORD=root -v mysql-data:/var/lib/mysql mysql:8
@@ -10,7 +10,7 @@ docker run -d --name mysql-db -e MYSQL_ROOT_PASSWORD=root -v mysql-data:/var/lib
 
 ---
 
-- Create a Test Database & Insert Data into it.
+- #### Create a Test Database & Insert Data into it.
 ```bash
 docker exec -it mysql-db mysql -uroot -proot
 ```
@@ -32,7 +32,7 @@ SELECT * FROM users;
 
 ---
 
-- Test Data Persistance by removing existing  container and then creating a new mysql container using the same volume
+- #### Test Data Persistance by removing existing  container and then creating a new mysql container using the same volume
 ```bash
 docker stop mysql-db
 docker rm mysql-db
