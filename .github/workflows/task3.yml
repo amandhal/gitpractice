@@ -1,0 +1,13 @@
+name: Using GitHub Context Variables
+
+on: [push, pull_request]
+
+jobs:
+  print-info:
+    name: Print Branch Name and Commit ID
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print Branch Name and Commit ID
+        run: |
+          echo "Branch Name: ${{ github.ref }}"
+          echo "Commit ID:   ${{ github.sha }}"
