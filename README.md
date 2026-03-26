@@ -152,5 +152,85 @@ jobs:
 
 ---
 
-### Task 4 – Security & Notifications
+Task 4 – Security & Notifications
+- Updated the reusable workflow in the Workflow Repository to add Trivy Scanning and Slack Webhook:
+```yaml
+name: Reusable Workflow to Tag Docker Images
 
+on:
+  workflow_call:
+    inputs:
+      image_name:
+        required: true
+        type: string
+      source_tag:
+        required: true
+        type: string
+      target_tag:
+        required: true
+        type: string
+    secrets:
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_PASSWORD:
+        required: true
+      SLACK_WEBHOOK:    
+        required: true
+
+jobs:
+  tag-image:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Login to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Pull existing image
+        run: |
+          docker pull ${{ secrets.DOCKER_USERNAME }}/${{ inputs.image_name }}:${{ inputs.source_tag }}
+
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@v0.35.0
+        with:
+          image-ref: ${{ secrets.DOCKER_USERNAME }}/${{ inputs.image_name }}:${{ inputs.source_tag }}
+          format: table
+          exit-code: 1
+          severity: CRITICAL,HIGH
+      
+      - name: Tag image
+        run: |
+          docker tag \
+          ${{ secrets.DOCKER_USERNAME }}/${{ inputs.image_name }}:${{ inputs.source_tag }} \
+          ${{ secrets.DOCKER_USERNAME }}/${{ inputs.image_name }}:${{ inputs.target_tag }}
+
+      - name: Push new tag
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ inputs.image_name }}:${{ inputs.target_tag }}
+
+      - name: Slack Success Notification
+        if: success()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_COLOR: good
+          SLACK_TITLE: "✅ Docker Image Built & Pushed"
+          SLACK_MESSAGE: "Image: ${{ inputs.image_name }}:${{ inputs.target_tag }} was successfully scanned, tagged, and pushed to Docker Hub."
+
+      - name: Slack Failure Notification
+        if: failure()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_COLOR: danger
+          SLACK_TITLE: "Workflow Failed ❌"
+          SLACK_MESSAGE: "❌ Push failed for Image: ${{ inputs.image_name }} | Check the Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+```
+
+- Pipeline failed as HIGH severity vulnerability found
+<img width="1917" height="446" alt="image" src="https://github.com/user-attachments/assets/5c46b1b6-b378-4576-9d00-f6963c42f197" />
+
+- Slack notification sent
+<img width="780" height="318" alt="image" src="https://github.com/user-attachments/assets/828390c5-eaeb-44b7-9697-2b67d65e8544" />
