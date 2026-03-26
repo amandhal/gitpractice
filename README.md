@@ -14,6 +14,8 @@ jobs:
 ```
 <img width="1918" height="549" alt="image" src="https://github.com/user-attachments/assets/9c6861d6-d3d8-4f21-9333-180ba8f829ce" />
 
+---
+
 ### Task 2 – Basic Docker Build & Push
 - Created workflow to build and push docker images to dockerhub
 ```yaml
@@ -60,4 +62,47 @@ jobs:
 ```
 <img width="1919" height="621" alt="image" src="https://github.com/user-attachments/assets/b4b85757-bff8-4664-88b8-a38f5f9383c8" />
 <img width="1919" height="669" alt="image" src="https://github.com/user-attachments/assets/45d5d6c8-9a88-4fc0-862e-9b554112cebc" />
+
+---
+
+### Task 3 – Shared Workflow Repository & Release
+- Tag Docker Images using shared workflow
+```yaml
+name: Tag Docker Image on Push using github shared workflow
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+
+jobs:
+  tag-staging:
+    if: ${{ github.ref_name == 'develop' }}
+    uses: amandhal/workflow-repository/.github/workflows/docker-ci.yml@v1.0.0
+    with:
+      image_name: frontend
+      source_tag: latest
+      target_tag: staging-${{ github.sha }}
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+  tag-prod:
+    if: ${{ github.ref_name == 'main' }}
+    uses: amandhal/workflow-repository/.github/workflows/docker-ci.yml@v1.0.0
+    with:
+      image_name: frontend
+      source_tag: latest
+      target_tag: prod-${{ github.run_number }}
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+```
+<img width="1919" height="691" alt="image" src="https://github.com/user-attachments/assets/d6b160e6-8c8e-4107-993a-5f948f789166" />
+<img width="1919" height="732" alt="image" src="https://github.com/user-attachments/assets/6c9a035f-eb4a-4977-8a1d-fc55129eaa59" />
+
+---
+
+### Task 4 – Security & Notifications
 
