@@ -66,7 +66,55 @@ jobs:
 ---
 
 ### Task 3 – Shared Workflow Repository & Release
-- Tag Docker Images using shared workflow
+- Created a shared workflow to tag docker images
+```yaml
+name: Reusable Workflow to Tag Docker Images
+
+on:
+  workflow_call:
+    inputs:
+      image_name:
+        required: true
+        type: string
+      source_tag:
+        required: true
+        type: string
+      target_tag:
+        required: true
+        type: string
+    secrets:
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_PASSWORD:
+        required: true
+
+jobs:
+  tag-image:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Login to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Pull existing image
+        run: |
+          docker pull ${{ secrets.DOCKER_USERNAME }}/${{ inputs.image_name }}:${{ inputs.source_tag }}
+
+      - name: Tag image
+        run: |
+          docker tag \
+          ${{ secrets.DOCKER_USERNAME }}/${{ inputs.image_name }}:${{ inputs.source_tag }} \
+          ${{ secrets.DOCKER_USERNAME }}/${{ inputs.image_name }}:${{ inputs.target_tag }}
+
+      - name: Push new tag
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ inputs.image_name }}:${{ inputs.target_tag }}
+```
+
+- Created caller workflow that calls shared workflow to tag images
 ```yaml
 name: Tag Docker Image on Push using github shared workflow
 
