@@ -2,7 +2,7 @@
 
 ## 📌 Introduction to Docker
 
-From what I understood, Docker is basically a tool that helps us run applications inside something called *containers*. These containers include everything the app needs — like code, libraries, and dependencies — so it works the same everywhere.
+Docker is basically a tool that helps us run applications inside something called *containers*. These containers include everything the app needs — like code, libraries, and dependencies — so it works the same everywhere.
 
 Earlier, apps used to break because of “works on my machine” issues, but Docker solves that by keeping environments consistent.
 
@@ -25,13 +25,13 @@ So basically, Docker makes life easier for both developers and DevOps teams.
 
 ---
 
-## ⚙️ Core Concepts (In Simple Words)
+## ⚙️ Core Concepts 
 
 ### 🧱 Docker Image  
 An image is like a blueprint or template. It contains everything needed to run an app, but it’s read-only.
 
 ### 📦 Docker Container  
-A container is the running version of an image. You can start, stop, or delete it anytime.
+A container is the running version of an image. We can start, stop, or delete it anytime.
 
 ### 📝 Dockerfile  
 This is just a file with instructions to build an image (like what base image to use, what dependencies to install, etc.)
@@ -85,19 +85,19 @@ This is useful for sharing images across systems.
 
 ---
 
-## 💻 Common Docker Commands (What I Learned)
+## 💻 Common Docker Commands 
 
 ```bash
 docker ps          # list running containers
 docker images      # list images
 docker build -t app .   # build image
 docker run -p 8080:80 app   # run container
-docker exec -it <id> bash   # access container
+docker exec -it <container_id> bash   # access container
 ```
 
 ---
 
-## 🧪 Dockerfile Example (Simple Understanding)
+## 🧪 Simple Dockerfile
 
 ```dockerfile
 FROM python:3.11-slim
@@ -110,7 +110,7 @@ CMD ["python", "app.py"]
 
 ---
 
-## ✅ Best Practices I Noted
+## ✅ Best Practices
 
 - Use lightweight images (like alpine)
 - Keep images small
@@ -126,10 +126,3 @@ Overall, Docker simplifies how applications are built, shipped, and run.
 
 **Main idea:**  
 Package everything once → run anywhere without issues
-
-Key concepts to remember:
-- Image vs Container  
-- Dockerfile  
-- Volumes & Networks  
-
-Next step: Practice with real projects and explore Docker Compose.
