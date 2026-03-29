@@ -1,4 +1,4 @@
-# 🐳 Day 1 – Docker Basics (My Understanding)
+# 🐳 Day 1 – Introduction & Best Practices
 
 ## 📌 Introduction to Docker
 
