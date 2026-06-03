@@ -98,15 +98,54 @@ The CD pipeline is triggered whenever code is merged into the `main` branch.
 
 This approach provides automated validation, infrastructure provisioning, application deployment, and post-deployment verification within a single GitHub Actions workflow.
 
-## Key Features
+## Issues Faced & Fixes
 
-✅ **Infrastructure Automation**: Complete IaC with Terraform
-✅ **Microservices Architecture**: Separated frontend and backend deployments
-✅ **Auto-scaling**: HPA for pods + Cluster Autoscaler for nodes
-✅ **High Availability**: Load balancing with NLB and Ingress
-✅ **Resource Monitoring**: Metrics Server for observability
-✅ **Automated Deployment**: GitHub Actions CI/CD pipeline
-✅ **Helm Integration**: Declarative Kubernetes deployments
+### 1. IAM Role Module Compatibility Issue
+
+While provisioning the EKS infrastructure, the latest version of the CloudDrove IAM Role module produced errors during deployment. After troubleshooting, I switched to a previous stable version of the module, which resolved the issue and allowed the infrastructure to be provisioned successfully.
+
+**Fix:**
+
+* Downgraded to a stable module version.
+* Verified successful Terraform deployment with the compatible release.
+
+### 2. Cluster Autoscaler Startup Dependency Issue
+
+During the initial deployment, the Cluster Autoscaler pod was created before the AWS EKS Pod Identity association was fully available. As a result, the Cluster Autoscaler failed to start correctly because it could not assume the required IAM permissions.
+
+**Fix:**
+
+* Performed a rollout restart of the Cluster Autoscaler deployment after Pod Identity became available.
+* Updated the Terraform code to explicitly manage resource dependencies using `depends_on`, ensuring Pod Identity resources are created before deploying the Cluster Autoscaler.
+* Re-tested the deployment and confirmed that the issue no longer occurs.
+
+## Improvements Roadmap
+
+### Helm Chart Enhancements
+
+* Improve chart reusability by introducing additional templating and configurable values.
+* Support easier deployment customization across different environments.
+
+### Terraform Improvements
+
+* Replace remaining hardcoded values with variables and locals.
+* Increase module flexibility and reusability for future deployments.
+
+### Security & Networking
+
+* Integrate Cert-Manager to automate TLS certificate provisioning and renewal.
+* Enable HTTPS for application ingress endpoints.
+
+### Kubernetes Modernization
+
+* Evaluate migration from Ingress resources to the Kubernetes Gateway API.
+* Leverage Gateway API's improved traffic management and extensibility features.
+
+### Observability
+
+* Add Prometheus and Grafana for monitoring and visualization.
+* Implement centralized logging for improved troubleshooting and operational visibility.
+
 
 
 
