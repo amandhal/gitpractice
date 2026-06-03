@@ -35,6 +35,13 @@ This project automates the entire lifecycle of deploying a containerized Node.js
 - Custom Helm charts for Kubernetes deployment
 - Ingress configuration with NLB for external user access
 
+## Scaling Configuration
+
+- **Pod Auto-scaling**: HPA monitors CPU/memory metrics and scales replicas
+- **Node Auto-scaling**: Cluster Autoscaler adjusts node count based on pending pods
+- **External Load Balancing**: NLB distributes traffic across backend instances
+
+
 ## 🛠️ Technology Stack
 
 | Component | Technology | Purpose |
@@ -151,8 +158,3 @@ During the initial deployment, the Cluster Autoscaler pod was created before the
 
 
 
-## Scaling Configuration
-
-- **Pod Auto-scaling**: HPA monitors CPU/memory metrics and scales replicas
-- **Node Auto-scaling**: Cluster Autoscaler adjusts node count based on pending pods
-- **External Load Balancing**: NLB distributes traffic across backend instances
