@@ -12,6 +12,7 @@ This project automates the entire lifecycle of deploying a containerized Node.js
 - Auto-scaling and monitoring
 
 ## Architecture
+<img width="2460" height="2312" alt="image" src="https://github.com/user-attachments/assets/3619033d-551c-45dc-a944-ccec2522645e" />
 
 ### Infrastructure Layer (Terraform - HCL)
 - **AWS EKS Cluster**: Managed Kubernetes using official AWS and EKS Terraform modules
@@ -70,8 +71,3 @@ This project automates the entire lifecycle of deploying a containerized Node.js
 - **Pod Auto-scaling**: HPA monitors CPU/memory metrics and scales replicas
 - **Node Auto-scaling**: Cluster Autoscaler adjusts node count based on pending pods
 - **External Load Balancing**: NLB distributes traffic across backend instances
-
-
-   
-
-<img width="2460" height="2312" alt="image" src="https://github.com/user-attachments/assets/3619033d-551c-45dc-a944-ccec2522645e" />
