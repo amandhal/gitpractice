@@ -50,7 +50,53 @@ This project automates the entire lifecycle of deploying a containerized Node.js
 | CI/CD | GitHub Actions | Automated deployment pipeline |
 
 
+# CI/CD Pipeline Overview
 
+This GitHub Actions workflow automates the validation, deployment, and verification of the application using separate Continuous Integration (CI) and Continuous Deployment (CD) stages.
+
+## Continuous Integration (Pull Requests)
+
+The CI pipeline is triggered whenever a Pull Request is opened against the `main` branch.
+
+### Workflow Steps
+
+1. Checkout the repository source code.
+2. Configure Terraform and initialize the infrastructure code.
+3. Validate Terraform configurations.
+4. Build frontend and backend Docker images to verify successful image creation.
+5. Lint the Helm chart to validate Kubernetes manifests and chart structure.
+6. Upload the Helm chart as a workflow artifact for inspection.
+
+This stage ensures that infrastructure code, application containers, and Kubernetes manifests are valid before merging changes into the main branch.
+
+---
+
+## Continuous Deployment (Push to Main)
+
+The CD pipeline is triggered whenever code is merged into the `main` branch.
+
+### Workflow Steps
+
+1. Checkout the repository source code.
+2. Configure AWS credentials and Terraform.
+3. Provision or update AWS infrastructure using Terraform.
+4. Build frontend and backend Docker images.
+5. Push versioned Docker images to Docker Hub using the Git commit SHA as the image tag.
+6. Configure access to the EKS cluster by updating the kubeconfig.
+7. Deploy or upgrade the application using Helm.
+8. Verify successful rollout of frontend and backend deployments.
+9. Execute smoke tests to confirm application health and connectivity.
+
+---
+
+## Deployment Strategy
+
+- Docker images are tagged using the Git commit SHA to provide immutable versioning.
+- Helm performs deployments using `helm upgrade --install`, enabling both initial installation and subsequent upgrades.
+- Rollout checks ensure Kubernetes deployments become healthy before proceeding.
+- Smoke tests validate that frontend and backend services are reachable after deployment.
+
+This approach provides automated validation, infrastructure provisioning, application deployment, and post-deployment verification within a single GitHub Actions workflow.
 
 ## Key Features
 
