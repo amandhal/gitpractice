@@ -153,7 +153,9 @@ During the initial deployment, the Cluster Autoscaler pod was created before the
 * Add Prometheus and Grafana for monitoring and visualization.
 * Implement centralized logging for improved troubleshooting and operational visibility.
 
-  # Manual Deployment Steps
+
+
+# Manual Deployment Steps
 
 ## Prerequisites
 
@@ -253,6 +255,45 @@ kubectl get pods -n node-app
 kubectl get svc -n node-app
 kubectl get ingress -n node-app
 ```
+
+# Automated CI/CD Deployment 
+
+The project includes a GitHub Actions workflow that automates infrastructure provisioning, application deployment, and deployment verification.
+
+## Prerequisites
+
+Configure the following GitHub repository secrets:
+
+* `AWS_ACCESS_KEY_ID`
+* `AWS_SECRET_ACCESS_KEY`
+* `DOCKERHUB_USERNAME`
+* `DOCKERHUB_PASSWORD`
+
+## Deployment Process
+
+1. Push changes to a feature branch and create a Pull Request against the `main` branch.
+
+2. The Continuous Integration (CI) pipeline is automatically triggered and performs:
+
+   * Terraform validation
+   * Docker image build validation
+   * Helm chart linting
+
+3. After the Pull Request is reviewed and merged into `main`, the Continuous Deployment (CD) pipeline is automatically triggered.
+
+4. The CD pipeline performs the following actions:
+
+   * Provisions or updates AWS infrastructure using Terraform
+   * Builds frontend and backend Docker images
+   * Pushes images to Docker Hub using the Git commit SHA as the image tag
+   * Configures access to the EKS cluster
+   * Deploys or upgrades the application using Helm
+   * Verifies deployment rollouts
+   * Executes smoke tests to validate application availability
+
+## Result
+
+Once code is merged into the `main` branch, the complete infrastructure and application deployment process is executed automatically without requiring any manual intervention.
 
 
 
