@@ -153,6 +153,108 @@ During the initial deployment, the Cluster Autoscaler pod was created before the
 * Add Prometheus and Grafana for monitoring and visualization.
 * Implement centralized logging for improved troubleshooting and operational visibility.
 
+  # Manual Deployment Steps
+
+## Prerequisites
+
+* AWS CLI configured
+* Terraform installed
+* Docker installed
+* kubectl installed
+* Helm installed
+* Docker Hub account
+
+## Infrastructure Deployment
+
+1. Clone the repository:
+
+```bash
+git clone <repository-url>
+cd devops-assessment-amandhal
+```
+
+2. Create an S3 bucket for the Terraform remote backend.
+
+3. Configure AWS credentials:
+
+```bash
+aws configure
+```
+
+4. Navigate to the Terraform directory:
+
+```bash
+cd terraform
+```
+
+5. Initialize Terraform:
+
+```bash
+terraform init
+```
+
+6. Provision the infrastructure:
+
+```bash
+terraform apply -auto-approve
+```
+
+This step creates the VPC, EKS cluster, managed node group, IAM roles, Cluster Autoscaler, Metrics Server, NAT GW, NLB and NGINX Ingress Controller.
+
+---
+
+## Application Deployment
+
+1. Login to Docker Hub:
+
+```bash
+docker login
+```
+
+2. Build and push the frontend image:
+
+```bash
+cd docker-node-app/frontend
+
+docker build -t <dockerhub-username>/node-app-frontend:<tag> .
+docker push <dockerhub-username>/node-app-frontend:<tag>
+```
+
+3. Build and push the backend image:
+
+```bash
+cd ../backend
+
+docker build -t <dockerhub-username>/node-app-backend:<tag> .
+docker push <dockerhub-username>/node-app-backend:<tag>
+```
+
+---
+
+## Kubernetes Deployment
+
+Deploy the application using Helm:
+
+```bash
+helm upgrade --install node-app ./helm-chart-node-app \
+  -n node-app \
+  --create-namespace \
+  --set image.frontend.tag=<tag> \
+  --set image.backend.tag=<tag>
+```
+
+Verify the deployment:
+
+```bash
+aws eks update-kubeconfig \
+  --region <aws-region> \
+  --name <cluster-name>
+kubectl get pods -n node-app
+kubectl get svc -n node-app
+kubectl get ingress -n node-app
+```
+
+
 
 
 
