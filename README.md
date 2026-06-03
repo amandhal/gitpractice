@@ -42,7 +42,7 @@ This project automates the entire lifecycle of deploying a containerized Node.js
 | Container Orchestration | AWS EKS | Managed Kubernetes |
 | Containerization | Docker | Application packaging |
 | Package Management | Helm | Kubernetes deployments |
-| API Gateway | NGINX Ingress Controller | Application routing |
+| External Access | NGINX Ingress Controller | Application routing |
 | Auto-scaling | HPA + Cluster Autoscaler | Dynamic resource scaling |
 | Monitoring | Metrics Server | Resource metrics collection |
 | Application Framework | Node.js | Microservices |
