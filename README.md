@@ -57,7 +57,7 @@
 
 ## Project Overview
 
-This project demonstrates the deployment of a production-style Node.js application on Amazon EKS using Infrastructure as Code, GitOps principles, automated CI/CD pipelines, monitoring, logging, and autoscaling capabilities.
+This project demonstrates the deployment of a Node.js application on Amazon EKS using Infrastructure as Code, automated CI/CD pipelines, monitoring, logging, and autoscaling capabilities.
 
 The infrastructure is provisioned using Terraform and deployed on AWS EKS. The application is packaged and deployed through a custom Helm chart and continuously delivered using GitHub Actions.
 
@@ -163,6 +163,14 @@ Custom dashboards were created for:
 * API Request Count
 * API Latency
 
+<img width="1916" height="585" alt="Screenshot 2026-06-04 183914" src="https://github.com/user-attachments/assets/91dc0f80-bb9a-44ca-a340-311c2a0ef369" />
+<img width="1919" height="595" alt="Screenshot 2026-06-04 184020" src="https://github.com/user-attachments/assets/2ba3b935-7896-493b-8308-8b8ff5fc3613" />
+<img width="1919" height="749" alt="Screenshot 2026-06-04 181928" src="https://github.com/user-attachments/assets/36e2437f-4198-40ad-ba08-e15ea6162f62" />
+<img width="1917" height="492" alt="Screenshot 2026-06-04 181303" src="https://github.com/user-attachments/assets/6f5bb239-5a6e-4759-b023-db8a95bcaa1c" />
+<img width="1919" height="507" alt="Screenshot 2026-06-04 181504" src="https://github.com/user-attachments/assets/f1ce91e7-bbef-4467-ab5a-d68a996b6d1e" />
+
+
+
 ---
 
 ## Logging Stack (EFK)
@@ -230,13 +238,17 @@ This provides fully automated infrastructure provisioning and application deploy
 
 ### Prerequisites
 
-* AWS CLI configured
+* AWS CLI installed
 * Terraform installed
-* AWS permissions for EKS deployment
+* AWS permissions through aws configure, iam role etc. for EKS deployment
 
 ### Remote State Setup
 
 Create an S3 bucket for Terraform state storage.
+
+```bash
+aws s3 mb s3://your-s3-bucket-name --region your-region
+```
 
 Update the bucket name inside:
 
@@ -273,7 +285,7 @@ aws eks update-kubeconfig \
 Deploy the application:
 
 ```bash
-helm install node-app helm-chart-node-app -n node-app --create-namespace
+helm install node-app helm-chart-node-app -n node-app --create-namespace=true
 ```
 
 Verify deployment:
@@ -328,7 +340,7 @@ The latest version of the CloudDrove IAM Role module failed during deployment du
 
 #### Solution
 
-Instead of modifying the module source code (which would create CI/CD maintenance issues), an earlier stable version of the module was used.
+Instead of modifying the module source code maually (which would create issues in CI/CD workflow), an earlier stable version of the module was used.
 
 This resolved the issue while preserving upgradeability and automation.
 
@@ -390,13 +402,10 @@ Implementation would involve:
 ### Additional Enhancements
 
 * ArgoCD GitOps deployment model
-* Terraform CI/CD approval workflow
 * External Secrets Operator integration
 * Grafana Alerting
 * Multi-environment support (Dev / Stage / Prod)
 * AWS Load Balancer Controller
-* Karpenter for advanced node provisioning
-* OpenTelemetry-based distributed tracing
 
 ---
 
@@ -446,7 +455,7 @@ Implementation would involve:
 
 * https://github.com/terraform-aws-modules/terraform-aws-eks
 * https://github.com/terraform-aws-modules/terraform-aws-vpc
-* https://github.com/cloudposse/terraform-aws-eks-pod-identity
+* https://github.com/clouddrove/terraform-aws-iam-role
 * https://kubernetes.io
 * https://helm.sh
 * https://prometheus.io
