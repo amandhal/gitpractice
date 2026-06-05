@@ -1,285 +1,204 @@
-# 🚀 Production-Grade Node.js on AWS EKS — Full DevOps Pipeline
-
-A complete end-to-end DevOps project deploying a Node.js application on AWS EKS with Infrastructure as Code, GitOps CI/CD, auto-scaling, centralized logging, and full observability.
-
----
-
-## 📋 Table of Contents
-
-- [Project Overview](#-project-overview)
-- [Architecture](#-architecture)
-- [Infrastructure (Terraform)](#-infrastructure-terraform)
-- [Node.js Application](#-nodejs-application)
-- [Helm Chart](#-helm-chart)
-- [CI/CD Pipeline (GitHub Actions)](#-cicd-pipeline-github-actions)
-- [Observability — Grafana Dashboards](#-observability--grafana-dashboards)
-- [Logging — Kibana Dashboards](#-logging--kibana-dashboards)
-- [Issues Faced & Fixes](#-issues-faced--fixes)
-- [Improvements Roadmap](#-improvements-roadmap)
-- [Deployment Guide — Terraform](#-deployment-guide--terraform)
-- [Deployment Guide — Kubernetes](#-deployment-guide--kubernetes)
-
----
-
-## 📌 Project Overview
-
-This project provisions a production-ready EKS cluster on AWS and deploys a Node.js application through a fully automated CI/CD pipeline. The stack covers every layer of a modern cloud-native deployment:
-
-| Layer | Technology |
-|---|---|
-| Cloud Infrastructure | AWS EKS, VPC, Subnets, NAT, Security Groups |
-| IaC | Terraform (official AWS EKS + VPC modules, CloudDrove IAM module) |
-| App | Node.js with `/health`, `/metrics`, structured JSON logs |
-| Packaging | Docker → Docker Hub |
-| Kubernetes | Custom Helm chart with HPA, Ingress, Probes, CronJob |
-| Autoscaling | Cluster Autoscaler via EKS Pod Identity |
-| Monitoring | Prometheus + Grafana (via Helm) |
-| Logging | EFK Stack — Elasticsearch, Fluentbit, Kibana (via Helm) |
-| CI/CD | GitHub Actions (CI on PR, CD on merge to main) |
-
----
-
-## 🏗 Architecture
-
-```
-                        ┌─────────────────────────────────────┐
-                        │              AWS VPC                 │
-                        │  ┌──────────────┐ ┌───────────────┐ │
-                        │  │ Public Subnet│ │Private Subnet │ │
-                        │  │  (NAT GW,   │ │  (EKS Nodes,  │ │
-                        │  │   Ingress)  │ │   Pods)       │ │
-                        │  └──────────────┘ └───────────────┘ │
-                        └─────────────────────────────────────┘
-                                         │
-                              ┌──────────▼──────────┐
-                              │     EKS Cluster      │
-                              │                      │
-              ┌───────────────┼──────────────────────┼──────────────────┐
-              │               │                      │                  │
-     ┌────────▼──────┐  ┌─────▼──────┐   ┌──────────▼──────┐  ┌───────▼───────┐
-     │  Node.js App  │  │ Prometheus │   │   Grafana        │  │  EFK Stack    │
-     │  (Deployment) │  │ (Scraping  │   │  (Dashboards)    │  │  (ES+Kibana   │
-     │  HPA + Ingress│  │  via SM)   │   │                  │  │  +Fluentbit)  │
-     └───────────────┘  └────────────┘   └──────────────────┘  └───────────────┘
-              │
-     ┌────────▼──────┐
-     │Cluster        │
-     │Autoscaler     │
-     │(Pod Identity) │
-     └───────────────┘
-```
-
----
-
-## 🌍 Infrastructure (Terraform)
-
-Infrastructure is defined under `terraform-eks/` and uses:
-
-- **Official AWS EKS Terraform module** — provisions the EKS control plane and managed node groups.
-- **Official AWS VPC Terraform module** — creates VPC, public + private subnets, route tables, NAT Gateway, and security groups automatically.
-- **CloudDrove `aws-iam-role` module** — creates an IAM role with required policies attached.
-- **`aws_eks_pod_identity_association` resource** — associates the IAM role with the service account used by Cluster Autoscaler, granting it the permissions it needs without static credentials.
-- **Custom Terraform Helm module** — installs Cluster Autoscaler, Prometheus, Grafana, and the EFK stack into the cluster via the Helm provider.
+# EKS Platform Automation Project
 
-> **State Management:** Remote state is stored in S3. See [Deployment Guide — Terraform](#-deployment-guide--terraform) for setup steps.
+## Table of Contents
+- [Project Overview](#project-overview)
+- [Architecture](#architecture)
+- [Infrastructure Provisioning](#infrastructure-provisioning)
+- [Platform Services](#platform-services)
+- [Application Deployment](#application-deployment)
+- [Observability](#observability)
+- [CI/CD Pipeline](#cicd-pipeline)
+- [Issues Faced and Fixes](#issues-faced-and-fixes)
+- [Deployment Steps](#deployment-steps)
+- [Roadmap](#roadmap)
 
----
+## Project Overview
+This project delivers an end-to-end AWS EKS platform built with Terraform, Helm, Docker, and GitHub Actions. It covers infrastructure provisioning, cluster add-ons, application deployment, observability, and CI/CD automation in a single workflow.
 
-## 🟢 Node.js Application
+The platform starts with an Amazon EKS cluster created using the official AWS EKS and VPC Terraform modules. These modules provision the core networking and cluster resources under the hood, including the VPC, public and private subnets, route tables, NAT, and security groups.
 
-A lightweight Express application exposing:
+On top of the base infrastructure, a custom Terraform module installs and manages operational tooling such as Cluster Autoscaler, Prometheus, Grafana, and the EFK stack through the Terraform Helm provider. This keeps cluster services declarative and version controlled alongside the infrastructure.
 
-| Endpoint | Description |
-|---|---|
-| `GET /health` | Liveness/readiness health check |
-| `GET /metrics` | Prometheus-compatible metrics (via `prom-client`) |
-| Additional routes | Business logic endpoints |
+The project also includes a production-oriented Node.js application packaged as a Docker image and deployed to EKS with a custom Helm chart. The chart includes health endpoints, metrics exposure, structured JSON logging, autoscaling, probes, ingress, and a cronjob, making it a good example of a cloud-native deployment.
 
-**Key characteristics:**
-- Structured JSON logging (compatible with Fluentbit parsing)
-- Prometheus metrics instrumented at the application level
-- Containerized via Docker and pushed to Docker Hub
+## Architecture
+The solution is organized into four layers:
 
----
+1. **Infrastructure layer**: Terraform provisions the VPC, subnets, routing, NAT, security groups, and the EKS control plane.
+2. **Platform layer**: Terraform and Helm install cluster-level services such as Cluster Autoscaler, Prometheus, Grafana, Elasticsearch, Fluent Bit, and Kibana.
+3. **Application layer**: A custom Helm chart deploys the Node.js application, Kubernetes resources, autoscaling configuration, and monitoring templates.
+4. **Delivery layer**: GitHub Actions validates, builds, plans, applies, deploys, and verifies changes through CI and CD workflows.
 
-## ⎈ Helm Chart
+This layered approach separates concerns clearly. Infrastructure, platform services, application manifests, and delivery automation can evolve independently while still working as one system.
 
-The custom Helm chart (`helm-chart-node-app/`) packages the full Kubernetes workload:
+## Infrastructure Provisioning
+The EKS cluster was provisioned using the official AWS Terraform modules for EKS and VPC. This provides a reliable baseline for creating production-ready AWS infrastructure using community-standard modules.
 
-| Resource | Details |
-|---|---|
-| `Deployment` | Rolling update strategy, resource limits/requests |
-| `Service` | ClusterIP for internal routing |
-| `Ingress` | Nginx Ingress Controller |
-| `HPA` | Horizontal Pod Autoscaler based on CPU/memory |
-| `ConfigMap` + `Secret` | Externalised configuration and sensitive values |
-| `Liveness Probe` | Hits `/health` to detect crashed pods |
-| `Readiness Probe` | Hits `/health` before routing traffic |
-| `CronJob` | Periodic API job |
-| `ServiceMonitor` | Prometheus ServiceMonitor so the app is auto-discovered for scraping |
+The networking stack includes:
+- VPC
+- Public and private subnets
+- Route tables
+- NAT gateway
+- Security groups
 
----
+A custom Terraform module was then used to install platform add-ons through the Helm provider. This made it possible to keep both infrastructure and cluster add-ons managed through Terraform rather than splitting responsibility across multiple tools.
 
-## 🔄 CI/CD Pipeline (GitHub Actions)
+For IAM integration, CloudDrove's `aws iam-role` Terraform module was used to create roles and attach the required IAM policies. Those roles were associated with Kubernetes service accounts using `aws_eks_pod_identity_association`, allowing workloads such as Cluster Autoscaler to access AWS APIs with least-privilege permissions.
 
-The workflow has two jobs:
+## Platform Services
+Several operational components were installed to make the cluster production-oriented:
 
-### CI — Triggered on Pull Request to `main`
+- **Cluster Autoscaler** to scale worker nodes based on unschedulable pods.
+- **Prometheus** to collect application and cluster metrics.
+- **Grafana** to visualize infrastructure and application performance.
+- **EFK stack** (Elasticsearch, Fluent Bit, Kibana) to centralize and analyze logs.
 
-| Step | Action |
-|---|---|
-| Terraform Validate | Validates all `.tf` files for syntax and correctness |
-| Docker Build Test | Builds the Docker image to catch build-time errors early |
-| Kubernetes Lint | Lints Helm chart templates |
-| Upload Artifacts | Stores build outputs for the CD job |
+This setup gives visibility into cluster health, application behavior, and operational events. It also creates a strong foundation for alerting, debugging, capacity planning, and performance monitoring.
 
-### CD — Triggered on Push (merge) to `main`
+## Application Deployment
+A Node.js application was created with endpoints such as `/health` and `/metrics`, along with additional APIs and structured JSON logs. The application was containerized and pushed to Docker Hub for use in the deployment pipeline.
 
-| Step | Action |
-|---|---|
-| Terraform Plan & Apply | Provisions or updates AWS infrastructure |
-| Docker Build & Push | Builds a fresh image and pushes to Docker Hub with the commit SHA tag |
-| Deploy to Cluster | Runs `helm upgrade --install` against the EKS cluster |
-| Rollout Verification | Waits for the deployment rollout to complete successfully |
-| Smoke Test | Hits the `/health` endpoint to confirm the live deployment is healthy |
+A custom Helm chart was created to deploy the application to EKS. The chart includes:
 
----
+- Deployments
+- Services
+- NGINX Ingress integration
+- ConfigMaps and Secrets
+- Resource requests and limits
+- Liveness and readiness probes
+- Rolling update strategy
+- Horizontal Pod Autoscaler (HPA)
+- A simple CronJob for API-related scheduled work
+- A Prometheus `ServiceMonitor` template for automatic metrics discovery
 
-## 📊 Observability — Grafana Dashboards
+Including the `ServiceMonitor` directly in the Helm chart ensures that once the application is deployed, Prometheus can immediately discover and scrape its metrics. This removes the need for separate monitoring manifests and improves deployment consistency.
 
-Four dashboards are configured in Grafana:
+## Observability
+The monitoring and logging stack was designed to cover both infrastructure and application visibility.
 
-| Dashboard | Panels |
-|---|---|
-| **Pod Resources** | CPU usage per pod, Memory usage per pod |
-| **Node Resources** | Node CPU utilisation, Node memory utilisation |
-| **API Latency** | P50 / P95 / P99 request duration histograms |
-| **Request Count** | Total requests/sec broken down by endpoint and status code |
+### Grafana Dashboards
+Grafana dashboards were created for:
+- Pod CPU and memory usage
+- Node CPU and memory usage
+- API latency
+- Request count
 
-Metrics are scraped by Prometheus via the `ServiceMonitor` resource deployed with the Helm chart.
+These dashboards help identify resource pressure, scaling behavior, and application performance trends over time.
 
----
+### Kibana Dashboards
+Custom Kibana dashboards were created to track:
+- Errors
+- Requests
+- Status codes
+- Top endpoints
 
-## 📜 Logging — Kibana Dashboards
+This makes it easier to debug application issues, inspect traffic patterns, and understand endpoint-level behavior from centralized logs.
 
-A custom Kibana dashboard visualises application logs shipped by Fluentbit into Elasticsearch:
+## CI/CD Pipeline
+The project uses GitHub Actions with separate **CI** and **CD** jobs.
 
-| Panel | Description |
-|---|---|
-| Error rate over time | Log volume filtered to `level: error` |
-| Request volume | Total log events per minute |
-| Status code distribution | Pie/bar chart of HTTP response codes |
-| Top endpoints | Most-hit API paths by request count |
+### CI Job
+The CI workflow is triggered on pull requests targeting the `main` branch. Its purpose is to validate changes before they are merged.
 
-Logs are structured as JSON at the application level so Kibana field parsing works out of the box.
+It performs:
+- Terraform validate
+- Docker build test
+- Kubernetes lint
+- Artifact upload
 
----
+### CD Job
+The CD workflow is triggered on pushes to the `main` branch. Its purpose is to apply approved changes and deploy the latest application version.
 
-## 🐛 Issues Faced & Fixes
+It performs:
+- Terraform plan and apply
+- Docker build and push
+- Deployment to the EKS cluster
+- Rollout verification
+- API smoke test
 
-### 1. CloudDrove IAM Role Module — Version Incompatibility
+This separation between CI and CD improves safety and clarity. Pull requests focus on validation, while merges to `main` act as the promotion point for actual deployment.
 
-**Problem:** Using the latest version of the CloudDrove `aws-iam-role` module threw a Terraform error caused by a bug inside the module's `version.tf`.
+## Issues Faced and Fixes
+### 1. CloudDrove IAM Role Module Version Issue
+When using the latest version of the CloudDrove IAM role module, an error occurred because of an issue in the module's `version.tf`. Instead of modifying the module source directly, which would make the pipeline brittle and harder to maintain, an older stable version (`latest - 1`) was used.
 
-**Fix:** Instead of patching the module manually (which would break the CI/CD pipeline since it pulls modules fresh), the previous stable version (latest − 1) was used. It worked without modification.
+This fix preserved CI/CD compatibility and kept the implementation maintainable. It is usually better to pin to a working version than patch third-party module code locally unless there is a strong reason to fork it.
 
----
+### 2. Cluster Autoscaler Permission Issue
+The Cluster Autoscaler pod was crashing because it did not have the AWS permissions it needed at startup. Even though the IAM role and pod identity association resources existed in Terraform, the `aws_eks_pod_identity_association` was being created after the autoscaler deployment had already completed.
 
-### 2. Cluster Autoscaler Pod Crashing — Missing Permissions at Startup
+After troubleshooting the logs, it became clear that the pod needed to be restarted once the association was in place. To prevent this race condition in future runs, `depends_on` was added so the pod identity association is created before the autoscaler deployment proceeds.
 
-**Problem:** After deployment, the Cluster Autoscaler pod was crash-looping. Logs showed it lacked the IAM permissions needed to describe and modify EC2 Auto Scaling Groups — even though the IAM role and `aws_eks_pod_identity_association` resource had been created.
-
-**Root Cause:** Terraform was creating the `aws_eks_pod_identity_association` resource *after* the Cluster Autoscaler Helm release had already completed. The pod started before the identity association existed, so it inherited no permissions.
-
-**Fix:**
-1. **Immediate:** Restarted the pod (`kubectl rollout restart`) after the association was confirmed active.
-2. **Permanent:** Added `depends_on = [aws_eks_pod_identity_association.cluster_autoscaler]` to the Helm release resource, ensuring the association is fully created before the Helm chart is deployed.
-
----
-
-## 🗺 Improvements Roadmap
-
-### HTTPS with cert-manager
-
-Currently the Nginx Ingress serves traffic over plain HTTP. The next step is to enable automatic TLS using [cert-manager](https://cert-manager.io/):
-
-1. Install cert-manager into the cluster via Helm.
-2. Create a `ClusterIssuer` resource pointing to Let's Encrypt (staging first, then production).
-3. Annotate the `Ingress` resource with `cert-manager.io/cluster-issuer` and add a `tls` block specifying the secret name and host.
-4. cert-manager will automatically provision and renew the TLS certificate via the ACME HTTP-01 or DNS-01 challenge.
-
-This eliminates the need to manually manage certificates and ensures zero-downtime renewals.
-
----
-
-## 🚢 Deployment Guide — Terraform
-
-### 1. Bootstrap remote state
-
-Create an S3 bucket for Terraform state, then update the bucket name in `terraform-eks/providers.tf`:
-
-```hcl
-terraform {
-  backend "s3" {
-    bucket = "your-tf-state-bucket-name"
-    key    = "eks/terraform.tfstate"
-    region = "your-aws-region"
-  }
-}
-```
-
-### 2. Run Terraform
+## Deployment Steps
+### Terraform Deployment
+1. Create an S3 bucket for Terraform state.
+2. Update the bucket name in `providers.tf`.
+3. Change into the Terraform directory:
 
 ```bash
 cd terraform-eks
+```
 
+4. Initialize Terraform:
+
+```bash
 terraform init
+```
+
+5. Validate the configuration:
+
+```bash
 terraform validate
+```
+
+6. Review the execution plan:
+
+```bash
 terraform plan
+```
+
+7. Apply the infrastructure:
+
+```bash
 terraform apply
 ```
 
-### 3. Deploy Fluentbit manually
+### Manual Fluent Bit Step
+One logging component needs to be deployed manually: Fluent Bit. The reason is that the Elasticsearch password is only available after the Elasticsearch secret is created, and that password must then be added to `fluentbit-values.yaml`.
 
-Fluentbit requires the Elasticsearch password, which is only available after Elasticsearch is created by Terraform. Once `terraform apply` completes:
-
-1. Retrieve the generated Elasticsearch password from the Kubernetes secret.
-2. Add the password to `fluentbit-values.yaml`.
-3. Install Fluentbit:
+After updating the values file, deploy Fluent Bit with:
 
 ```bash
-helm upgrade --install fluent-bit \
-  oci://ghcr.io/fluent/helm-charts/fluent-bit \
+helm upgrade --install fluent-bit oci://ghcr.io/fluent/helm-charts/fluent-bit \
   -n logging \
   -f fluentbit-values.yaml \
   --version 0.57.6
 ```
 
----
-
-## ☸️ Deployment Guide — Kubernetes
-
-### 1. Configure kubeconfig
+### Kubernetes Application Deployment
+To connect to the cluster:
 
 ```bash
-aws eks update-kubeconfig \
-  --region your-aws-region \
-  --name your-cluster-name
+aws eks update-kubeconfig --region your-aws-region --name your-cluster-name
 ```
 
-### 2. Deploy the application
+Then deploy the application Helm chart:
 
 ```bash
 helm install node-app helm-chart-node-app -n node-app
 ```
 
-To upgrade after a new image is pushed:
+## Roadmap
+### Enable HTTPS with cert-manager
+A strong next improvement is enabling HTTPS using **cert-manager**. At the moment, ingress can expose the application over HTTP, but production environments should terminate TLS to encrypt traffic between users and the platform.
 
-```bash
-helm upgrade node-app helm-chart-node-app -n node-app \
-  --set image.tag=<new-tag>
-```
+With cert-manager, TLS certificates can be issued and renewed automatically, commonly using Let's Encrypt. This removes the operational burden of manually creating, rotating, and updating certificates in Kubernetes.
 
----
+A good implementation path would be:
+- Install cert-manager in the cluster.
+- Create a `ClusterIssuer` or `Issuer` for Let's Encrypt.
+- Update the Ingress resource in the Helm chart to include TLS configuration.
+- Add DNS records that point the domain to the ingress load balancer.
+- Let cert-manager automatically request and renew certificates.
 
-> Built with Terraform · Kubernetes · Helm · GitHub Actions · Prometheus · Grafana · EFK Stack
+This improvement would strengthen security, improve browser trust, and make the application more production-ready for real-world exposure.
